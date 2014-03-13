@@ -60,7 +60,7 @@ tags: /* empty */
 ;
 
 titleTag: TITLE STRING;
-artistTag: ARTIST STRING;
+artistTag: ARTIST STRING {cout << "Artist Parsed with value" << *$2 << endl; };
 mp3Tag: MP3 STRING;
 gapTag: GAP INT;
 bpmTag: BPM FLOAT;
@@ -71,7 +71,8 @@ backgroundTag: BACKGROUND STRING;
 relativeTag: RELATIVE BOOL;
 
 data: /* empty */
-| data LINEBREAK INT INT INT STRING { cout << "line: " << $2 << $3 << $4 << $5 << $6 << endl; }
+| data LINESTART INT INT INT STRING { cout << "line: " << *$2 << " " << $3 << " " << $4 << " " << $5 << " " << *$6 << endl; }
+| data LINEBREAK INT INT
 
 %%
 
