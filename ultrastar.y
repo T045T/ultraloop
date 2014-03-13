@@ -298,7 +298,7 @@ line_end : LINEBREAK INT INT
 
 int main(int argc, char** argv) {
   if (argc < 2) { 
-    cout << "Wrong number of arguments!\nUsage: ultrastar ultrastar_in.txt [blitzloop_out.txt]" << endl;
+    cout << "Wrong number of arguments!\nUsage:\nultraloop ultrastar_in.txt [blitzloop_out.txt]" << endl;
     return 1; 
   }
   FILE *myfile = fopen(argv[1], "r");
