@@ -6,7 +6,7 @@
   using namespace std;
   int triplet_count = 0;
   int line_num = 0;
-  %}
+%}
 
 %option noyywrap
 %x STRINGPARSE
@@ -158,12 +158,12 @@ return ARTIST;
   return INT;
 };
 
-^[:*F]{ yylval.text = new std::string(yytext); triplet_count = 3; return NOTETYPE; };
-^- { yylval.text = new std::string(yytext); return LINEBREAK; };
-YES { yylval.boolean = true; return BOOL; };
-TRUE { yylval.boolean = true; return BOOL; };
-NO { yylval.boolean = false; return BOOL; };
-FALSE { yylval.boolean = false; return BOOL; };
+^[:*F] { yylval.text = new std::string(yytext); triplet_count = 3; return NOTETYPE; };
+^-     { yylval.text = new std::string(yytext); return LINEBREAK; };
+YES    { yylval.boolean = true; return BOOL; };
+TRUE   { yylval.boolean = true; return BOOL; };
+NO     { yylval.boolean = false; return BOOL; };
+FALSE  { yylval.boolean = false; return BOOL; };
 
 <STRINGPARSE>[^\r\n]+ {
 #ifdef DEBUG_LEXER
