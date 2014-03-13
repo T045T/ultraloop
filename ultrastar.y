@@ -17,9 +17,9 @@
   //! the duration of the previous note - only needed for the last notes of each line, and very last one, since all others are determined by the difference to the previous note
   int lastDuration = 0;
   //! The lyrics line we're currently working on - each syllable will be added to this
-  stringstream currentLyrics("L: ");
+  stringstream currentLyrics;
   //! The timing line we're currently working on
-  stringstream currentTiming("@: ");
+  stringstream currentTiming;
   //! the entire lyrics data block
   stringstream lyricsBlock;
   
@@ -308,6 +308,9 @@ int main(int argc, char** argv) {
   }
   yyin = myfile;
   lyricsBlock << "[Lyrics]\n\n";
+
+  currentLyrics << "L: ";
+  currentTiming << "@: ";
   do {
     yyparse();
   } while(!feof(yyin));
