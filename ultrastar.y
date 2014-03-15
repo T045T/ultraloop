@@ -85,6 +85,7 @@
 %token <text> RELATIVE
 %token <text> LANGUAGE
 %token <text> VIDEOGAP
+%token <text> UNKNOWNTAG
 
 %%
 
@@ -167,7 +168,14 @@ tags: /* empty */
 | tags languageTag
 | tags coverTag
 | tags videogapTag
+| tags unknown
 ;
+
+unknown: UNKNOWNTAG STRING
+{
+    // Nothing!
+    cout << "Warning: Tag " << *$1 << *$2 << " ignored." << endl;
+};
 
 titleTag: TITLE STRING 
 {

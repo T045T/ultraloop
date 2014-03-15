@@ -137,6 +137,15 @@ return ARTIST;
   return VIDEOGAP;
  };
 
+^#[A-Z]+: {
+#ifdef DEBUG_LEXER
+  cout << "Unrecognized Tag" << endl;
+#endif
+  yylval.text = new std::string(yytext);
+  BEGIN(STRINGPARSE);
+  return UNKNOWNTAG;
+ };
+
 [,\.][0-9]+ {
 #ifdef DEBUG_LEXER
   cout << "Fraction" << endl;
