@@ -1,6 +1,7 @@
 %{
   #include <iostream>
   #include <sstream>
+  #include <string.h>
   #include <fstream>
   #include <cstdio>
   #include "blitzloop_data.h"
@@ -246,12 +247,18 @@ coverTag: COVER STRING
 };
 videogapTag : VIDEOGAP INT FRACTION 
 {
-  songInfo.video_offset = ((float) $2) + $3;
+  float value = ((float) $2) + $3;
+  ostringstream tmp;
+  tmp << value;
+  songInfo.video_offset = tmp.str();
   // cout << "Video offset is " << songInfo.video_offset << endl;
 }
 | VIDEOGAP INT 
 {
-  songInfo.video_offset = (float) $2;
+  float value = (float) $2;
+  ostringstream tmp;
+  tmp << value;
+  songInfo.video_offset = tmp.str();
   // cout << "Video offset is " << songInfo.video_offset << endl;
 }
 ;
