@@ -34,7 +34,8 @@ Timing UStoBLtiming(int gap, float bpm, int endBeat) {
   result.startTime = ((float) gap) / 1000.f;
   result.startCount = 0;
   float secondsPerBeat = 60.f / bpm;
-  result.endTime = result.startTime + ((float) endBeat) * secondsPerBeat;
+  // Division by four is necessary because Ultrastar actually counts in quarter beats
+  result.endTime = result.startTime + (((float) endBeat) * secondsPerBeat) / 4;
   result.endCount = endBeat;
   return result;
 }
