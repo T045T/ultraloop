@@ -41,6 +41,8 @@
   int lineStart = 0;
   //! set to true whenever a line end is found - the next syllable will set the line start for the next line
   bool newLine = false;
+  //! used whenever we encounter a single ~ character -- these are UltraStar's syllable-joiners and should not show up in BlitzLoop output, so we hide the syllables and carry over their timing length to the next one
+  int carry = 0;
   void appendLine() {
     currentLyrics << "$\n";
     currentTiming << " " << lastDuration;
@@ -282,6 +284,7 @@ videogapTag : VIDEOGAP INT FRACTION
 data: /* empty */
 | data NOTETYPE INT INT INT STRING 
 { 
+  const char* syllable = (*$6).c_str() + 1;
   if (newLine) {
     newLine = false;
     int start = $3;
@@ -291,16 +294,25 @@ data: /* empty */
     currentTiming << start << " ";
   } else //since we can only calculate the duration for the previous note, do nothing on new line
   {
-    currentTiming << " " << $3 - lastBeat;
+    if (strncmp(syllable, "~", 2)) {
+      currentTiming << " " << $3 - lastBeat + carry;
+      carry = 0;
+    } else {
+      carry += $3 - lastBeat;
+    }
   }
   // cut off the leading space (there will always be one to separate the syllable from the last number)
-  const char* syllable = (*$6).c_str() + 1;
   // if there's another space in front of the syllable, move it outside of the curly braces
   // (this doesn't account for trailing spaces, but they won't throw off the timing as much anyway)
-  if (syllable[0] == ' ') {
-    currentLyrics << " {" << syllable + 1 << "}";
-  } else {
-    currentLyrics << "{" << syllable << "}";
+  if (strncmp(syllable, "~", 2)) {
+    if (syllable[0] == ' ') {
+      currentLyrics << " ";
+    }
+    if (syllable[0] == '~' || syllable[0] == ' ') {
+      currentLyrics << "{" << syllable + 1 << "}";
+    } else {
+      currentLyrics << "{" << syllable << "}";
+    }
   }
 
   lastBeat = $3;
