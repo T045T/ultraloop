@@ -338,6 +338,6 @@ int main(int argc, char** argv) {
 
 
 void yyerror(const char* s) {
-  cout << "OHNOES! Error Message on line " << line_num << ": " << s << endl;
+  cout << "OHNOES! Error Message on line " << line_num + 1 << ": " << s << endl;
   exit(1);
 }
