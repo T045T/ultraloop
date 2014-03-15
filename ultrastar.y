@@ -108,37 +108,53 @@ song: tags data END
   // [Meta] part
   if (metaData.title.length() == 0) yyerror("No Title!");  
   if (metaData.artist.length() == 0) yyerror("No Artist!");
-  if (metaData.album.length() == 0) cout << "Warning: No Album!" << endl;
-  if (metaData.seenon.length() == 0) cout << "Warning: No Edition/Seenon!" << endl;
-  if (metaData.genre.length() == 0) cout << "Warning: No Genre!" << endl;
-  if (metaData.lang.length() == 0) {
-    cout << "Warning: No language! (Setting to English to avoid confusing blitzloop)" << endl;
-    metaData.lang = "English";
-  }
 
   metaBlock << "[Meta]\n";
   metaBlock << "title=" << metaData.title << "\n";
   metaBlock << "artist=" << metaData.artist << "\n";
-  metaBlock << "album=" << metaData.album << "\n";
-  metaBlock << "seenon=" << metaData.seenon << "\n";
-  metaBlock << "seenon[l]=" << metaData.seenon << "\n";
-  metaBlock << "genre[*]=" << metaData.genre << "\n";
-  metaBlock << "lang[*]=" << metaData.lang << "\n\n";
+  if (metaData.album.length() == 0) {
+    cout << "Warning: No Album!" << endl;
+  } else {
+    metaBlock << "album=" << metaData.album << "\n";
+  }
+  if (metaData.seenon.length() == 0) {
+    cout << "Warning: No Edition/Seenon!" << endl;
+  } else {
+    metaBlock << "seenon=" << metaData.seenon << "\n";
+    metaBlock << "seenon[l]=" << metaData.seenon << "\n";
+  }
+  if (metaData.genre.length() == 0) {
+    cout << "Warning: No Genre!" << endl;
+  } else {
+    metaBlock << "genre[*]=" << metaData.genre << "\n";
+  }
+  if (metaData.lang.length() == 0) {
+    cout << "Warning: No language! (Setting to English to avoid confusing blitzloop)" << endl;
+    metaData.lang = "English";
+  } else {
+    metaBlock << "lang[*]=" << metaData.lang << "\n\n";
+  }
 
   // [Song] part
   if (songInfo.audio.length() == 0) yyerror("No song file!");
-  if (songInfo.video.length() == 0) cout << "Warning: No video file!" << endl;
-  if (songInfo.video_offset.length() == 0) {
-    cout << "Warning: No video offset! Assuming 0" << endl;
-    songInfo.video_offset = "0.0";
-  }  
-  if (songInfo.cover.length() == 0) cout << "Warning: No cover file!" << endl;
 
   metaBlock << "[Song]\n";
   metaBlock << "audio=" << songInfo.audio << "\n";
-  metaBlock << "video=" << songInfo.video << "\n";
+  if (songInfo.video.length() == 0) {
+    cout << "Warning: No video file!" << endl;
+  } else {
+    metaBlock << "video=" << songInfo.video << "\n";
+  }
+  if (songInfo.video_offset.length() == 0) {
+    cout << "Warning: No video offset! Assuming 0" << endl;
+    songInfo.video_offset = "0.0";
+  }
   metaBlock << "video_offset=" << songInfo.video_offset << "\n";
-  metaBlock << "cover=" << songInfo.cover << "\n\n";
+  if (songInfo.cover.length() == 0) {
+    cout << "Warning: No cover file!" << endl;
+  } else {
+    metaBlock << "cover=" << songInfo.cover << "\n\n";
+  }
 
   // [Timing] part
   if (bpm < 0) {
