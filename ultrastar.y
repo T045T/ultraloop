@@ -319,6 +319,7 @@ int main(int argc, char** argv) {
 
   currentLyrics << "L: ";
   currentTiming << "@: ";
+  newLine = true;
   do {
     yyparse();
   } while(!feof(yyin));
