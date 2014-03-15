@@ -34,7 +34,7 @@ Timing UStoBLtiming(int gap, float bpm, int endBeat) {
   result.startTime = ((float) gap) / 1000.f;
   result.startCount = 0;
   float secondsPerBeat = 60.f / bpm;
-  result.endTime = ((float) endBeat) * secondsPerBeat;
+  result.endTime = result.startTime + ((float) endBeat) * secondsPerBeat;
   result.endCount = endBeat;
   return result;
 }
