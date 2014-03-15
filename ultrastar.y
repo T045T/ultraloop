@@ -143,6 +143,9 @@ song: tags data END
   if (bpm < 0) {
     yyerror("No BPM given!");
   }
+  if (relative) {
+      lastBeat += lineStart;
+  }
   timingInfo = UStoBLtiming(gap, bpm, lastBeat);
   metaBlock << "[Timing]\n";
   metaBlock << "@" << timingInfo.startTime << "=" << timingInfo.startCount << "\n";
@@ -228,7 +231,7 @@ relativeTag: RELATIVE BOOL
 {
   relative = $2;
   if (relative) {
-    // cout << "Song file is relative!" << endl;
+      // cout << "Song file is relative!" << endl;
   }
 };
 languageTag: LANGUAGE STRING 
