@@ -1,6 +1,7 @@
 %{
   #include <iostream>
   #include <sstream>
+  #include <string.h>
   #include <fstream>
   #include <cstdio>
   #include "blitzloop_data.h"
@@ -40,6 +41,8 @@
   int lineStart = 0;
   //! set to true whenever a line end is found - the next syllable will set the line start for the next line
   bool newLine = false;
+  //! used whenever we encounter a single ~ character -- these are UltraStar's syllable-joiners and should not show up in BlitzLoop output, so we hide the syllables and carry over their timing length to the next one
+  int carry = 0;
   void appendLine() {
     currentLyrics << "$\n";
     currentTiming << " " << lastDuration;
@@ -107,37 +110,53 @@ song: tags data END
   // [Meta] part
   if (metaData.title.length() == 0) yyerror("No Title!");  
   if (metaData.artist.length() == 0) yyerror("No Artist!");
-  if (metaData.album.length() == 0) cout << "Warning: No Album!" << endl;
-  if (metaData.seenon.length() == 0) cout << "Warning: No Edition/Seenon!" << endl;
-  if (metaData.genre.length() == 0) cout << "Warning: No Genre!" << endl;
-  if (metaData.lang.length() == 0) {
-    cout << "Warning: No language! (Setting to English to avoid confusing blitzloop)" << endl;
-    metaData.lang = "English";
-  }
 
   metaBlock << "[Meta]\n";
   metaBlock << "title=" << metaData.title << "\n";
   metaBlock << "artist=" << metaData.artist << "\n";
-  metaBlock << "album=" << metaData.album << "\n";
-  metaBlock << "seenon=" << metaData.seenon << "\n";
-  metaBlock << "seenon[l]=" << metaData.seenon << "\n";
-  metaBlock << "genre[*]=" << metaData.genre << "\n";
-  metaBlock << "lang[*]=" << metaData.lang << "\n\n";
+  if (metaData.album.length() == 0) {
+    cout << "Warning: No Album!" << endl;
+  } else {
+    metaBlock << "album=" << metaData.album << "\n";
+  }
+  if (metaData.seenon.length() == 0) {
+    cout << "Warning: No Edition/Seenon!" << endl;
+  } else {
+    metaBlock << "seenon=" << metaData.seenon << "\n";
+    metaBlock << "seenon[l]=" << metaData.seenon << "\n";
+  }
+  if (metaData.genre.length() == 0) {
+    cout << "Warning: No Genre!" << endl;
+  } else {
+    metaBlock << "genre[*]=" << metaData.genre << "\n";
+  }
+  if (metaData.lang.length() == 0) {
+    cout << "Warning: No language! (Setting to English to avoid confusing blitzloop)" << endl;
+    metaData.lang = "English";
+  } else {
+    metaBlock << "lang[*]=" << metaData.lang << "\n\n";
+  }
 
   // [Song] part
   if (songInfo.audio.length() == 0) yyerror("No song file!");
-  if (songInfo.video.length() == 0) cout << "Warning: No video file!" << endl;
-  if (songInfo.video_offset.length() == 0) {
-    cout << "Warning: No video offset! Assuming 0" << endl;
-    songInfo.video_offset = "0.0";
-  }  
-  if (songInfo.cover.length() == 0) cout << "Warning: No cover file!" << endl;
 
   metaBlock << "[Song]\n";
   metaBlock << "audio=" << songInfo.audio << "\n";
-  metaBlock << "video=" << songInfo.video << "\n";
+  if (songInfo.video.length() == 0) {
+    cout << "Warning: No video file!" << endl;
+  } else {
+    metaBlock << "video=" << songInfo.video << "\n";
+  }
+  if (songInfo.video_offset.length() == 0) {
+    cout << "Warning: No video offset! Assuming 0" << endl;
+    songInfo.video_offset = "0.0";
+  }
   metaBlock << "video_offset=" << songInfo.video_offset << "\n";
-  metaBlock << "cover=" << songInfo.cover << "\n\n";
+  if (songInfo.cover.length() == 0) {
+    cout << "Warning: No cover file!" << endl;
+  } else {
+    metaBlock << "cover=" << songInfo.cover << "\n\n";
+  }
 
   // [Timing] part
   if (bpm < 0) {
@@ -246,12 +265,18 @@ coverTag: COVER STRING
 };
 videogapTag : VIDEOGAP INT FRACTION 
 {
-  songInfo.video_offset = ((float) $2) + $3;
+  float value = ((float) $2) + $3;
+  ostringstream tmp;
+  tmp << value;
+  songInfo.video_offset = tmp.str();
   // cout << "Video offset is " << songInfo.video_offset << endl;
 }
 | VIDEOGAP INT 
 {
-  songInfo.video_offset = (float) $2;
+  float value = (float) $2;
+  ostringstream tmp;
+  tmp << value;
+  songInfo.video_offset = tmp.str();
   // cout << "Video offset is " << songInfo.video_offset << endl;
 }
 ;
@@ -259,6 +284,7 @@ videogapTag : VIDEOGAP INT FRACTION
 data: /* empty */
 | data NOTETYPE INT INT INT STRING 
 { 
+  const char* syllable = (*$6).c_str() + 1;
   if (newLine) {
     newLine = false;
     int start = $3;
@@ -268,16 +294,25 @@ data: /* empty */
     currentTiming << start << " ";
   } else //since we can only calculate the duration for the previous note, do nothing on new line
   {
-    currentTiming << " " << $3 - lastBeat;
+    if (strncmp(syllable, "~", 2)) {
+      currentTiming << " " << $3 - lastBeat + carry;
+      carry = 0;
+    } else {
+      carry += $3 - lastBeat;
+    }
   }
   // cut off the leading space (there will always be one to separate the syllable from the last number)
-  const char* syllable = (*$6).c_str() + 1;
   // if there's another space in front of the syllable, move it outside of the curly braces
   // (this doesn't account for trailing spaces, but they won't throw off the timing as much anyway)
-  if (syllable[0] == ' ') {
-    currentLyrics << " {" << syllable + 1 << "}";
-  } else {
-    currentLyrics << "{" << syllable << "}";
+  if (strncmp(syllable, "~", 2)) {
+    if (syllable[0] == ' ') {
+      currentLyrics << " ";
+    }
+    if (syllable[0] == '~' || syllable[0] == ' ') {
+      currentLyrics << "{" << syllable + 1 << "}";
+    } else {
+      currentLyrics << "{" << syllable << "}";
+    }
   }
 
   lastBeat = $3;
