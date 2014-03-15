@@ -156,7 +156,7 @@ return ARTIST;
   return FRACTION;
 };
 
-(-)?[0-9]+ {
+(\ -)?[0-9]+ {
 #ifdef DEBUG_LEXER
   cout << "Int" << endl;
 #endif
