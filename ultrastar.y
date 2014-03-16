@@ -293,7 +293,6 @@ data: /* empty */
 
   // If the string is empty or contains just a single space, the lexer has removed one or more Tilde characters, so this line should be merged with the previous syllable
   bool isSpacer = $6->length() < 2;
-  cout << "line: " << *$6 << " length: " << $6->length() << endl;
 
   //since we can only calculate the duration for the previous note, don't append anything to currentTiming on new line
   if (newLine) {
@@ -367,7 +366,6 @@ int main(int argc, char** argv) {
 
   if (argc == 4) {
     metaChars = argv[3];
-    cout << "MetaChars are: [" << metaChars << "]" << endl;
   }
 
   lyricsBlock << "[Lyrics]\n\n";
