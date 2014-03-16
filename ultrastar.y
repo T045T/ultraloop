@@ -4,6 +4,7 @@
   #include <string.h>
   #include <fstream>
   #include <cstdio>
+  #include <algorithm>
   #include "blitzloop_data.h"
   using namespace std;
 
@@ -11,6 +12,8 @@
   extern "C" int yyparse();
   extern "C" FILE *yyin;
   extern int line_num;
+  // this needs to be set to something if you want to filter tildes and such! Defaults to empty string -> no characters are filtered
+  extern string metaChars;
   
   // Variables to build Ultrastar data
   //! The last beat - needed to calculate the difference to current beat, which is what blitzloop uses
@@ -45,7 +48,8 @@
   int carry = 0;
   void appendLine() {
     currentLyrics << "$\n";
-    currentTiming << " " << lastDuration;
+    currentTiming << " " << lastDuration + carry;
+    carry = 0;
     lyricsBlock << currentLyrics.str() << currentTiming.str() << "\n\n";
     currentLyrics.str("");
     currentLyrics.clear();
@@ -284,39 +288,46 @@ videogapTag : VIDEOGAP INT FRACTION
 data: /* empty */
 | data NOTETYPE INT INT INT STRING 
 { 
+  // cut off the leading space (there will always be one to separate the syllable from the last number)  
   const char* syllable = (*$6).c_str() + 1;
+
+  // If the string is empty or contains just a single space, the lexer has removed one or more Tilde characters, so this line should be merged with the previous syllable
+  bool isSpacer = $6->length() < 2;
+  cout << "line: " << *$6 << " length: " << $6->length() << endl;
+
+  //since we can only calculate the duration for the previous note, don't append anything to currentTiming on new line
   if (newLine) {
-    newLine = false;
     int start = $3;
     if (relative) {
       start += lineStart;
     }
     currentTiming << start << " ";
-  } else //since we can only calculate the duration for the previous note, do nothing on new line
+  } else 
   {
-    if (strncmp(syllable, "~", 2)) {
-      currentTiming << " " << $3 - lastBeat + carry;
-      carry = 0;
-    } else {
+    if (isSpacer) {
       carry += $3 - lastBeat;
+    } else {
+      currentTiming << " " << ($3 - lastBeat) + carry;
+      carry = 0;
     }
   }
-  // cut off the leading space (there will always be one to separate the syllable from the last number)
+  
   // if there's another space in front of the syllable, move it outside of the curly braces
   // (this doesn't account for trailing spaces, but they won't throw off the timing as much anyway)
-  if (strncmp(syllable, "~", 2)) {
+  if (!isSpacer) {
     if (syllable[0] == ' ') {
-      currentLyrics << " ";
-    }
-    if (syllable[0] == '~' || syllable[0] == ' ') {
-      currentLyrics << "{" << syllable + 1 << "}";
+      currentLyrics << " {" << syllable + 1 << "}";
     } else {
       currentLyrics << "{" << syllable << "}";
     }
+  } else if (newLine) {
+    // if there's a "spacer" character at the beginning of a line, print if, because carrying over line breaks is tedious...
+    currentLyrics << "{~}";
   }
 
   lastBeat = $3;
   lastDuration = $4;
+  newLine = false;
 }
 | data line_end 
 {
@@ -344,7 +355,7 @@ line_end : LINEBREAK INT INT
 
 int main(int argc, char** argv) {
   if (argc < 2) { 
-    cout << "Wrong number of arguments!\nUsage:\nultraloop ultrastar_in.txt [blitzloop_out.txt]" << endl;
+    cout << "Wrong number of arguments!\nUsage:\nultraloop ultrastar_in.txt [blitzloop_out.txt] [syllable_joiners]" << endl;
     return 1; 
   }
   FILE *myfile = fopen(argv[1], "r");
@@ -353,8 +364,13 @@ int main(int argc, char** argv) {
     return 1;
   }
   yyin = myfile;
-  lyricsBlock << "[Lyrics]\n\n";
 
+  if (argc == 4) {
+    metaChars = argv[3];
+    cout << "MetaChars are: [" << metaChars << "]" << endl;
+  }
+
+  lyricsBlock << "[Lyrics]\n\n";
   currentLyrics << "L: ";
   currentTiming << "@: ";
   newLine = true;
@@ -362,7 +378,7 @@ int main(int argc, char** argv) {
     yyparse();
   } while(!feof(yyin));
 
-  if (argc == 3) {
+  if (argc > 2) {
     ofstream output(argv[2]);
     if (!output.good()) {
       cout << "Can't open output file - will print output to stdio" << endl;

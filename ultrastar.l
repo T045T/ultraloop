@@ -7,12 +7,18 @@
   int triplet_count = 0;
   int line_num = 0;
 
+  string metaChars = "";
   void debug_output(std::string output) {
     #ifdef DEBUG_LEXER
       cout << output << endl;
     #endif
   }
 
+  void filter_string(string* input, string filterChars) {
+    for (int i = 0; i < filterChars.length(); i++) {
+      input->erase(remove(input->begin(), input->end(), filterChars.c_str()[i]), input->end());
+    }
+  }
 %}
 
 %option noyywrap
@@ -150,6 +156,7 @@ FALSE  { yylval.boolean = false; return BOOL; };
 <STRINGPARSE>[^\r\n]+ {
   debug_output("String");
   yylval.text = new std::string(yytext);
+  filter_string(yylval.text, metaChars);
   BEGIN(INITIAL);
   return STRING;
  };
