@@ -2,6 +2,7 @@
 #include <iostream>
 #define YY_DECL extern "C" int yylex()
 #include "ultrastar.tab.h"
+#include <algorithm>
   //#define DEBUG_LEXER
   using namespace std;
   int triplet_count = 0;

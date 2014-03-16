@@ -4,7 +4,6 @@
   #include <string.h>
   #include <fstream>
   #include <cstdio>
-  #include <algorithm>
   #include "blitzloop_data.h"
   using namespace std;
 
