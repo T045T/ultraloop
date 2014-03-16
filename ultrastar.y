@@ -353,8 +353,8 @@ line_end : LINEBREAK INT INT
 %%
 
 int main(int argc, char** argv) {
-  if (argc < 2) { 
-    cout << "Wrong number of arguments!\nUsage:\nultraloop ultrastar_in.txt [blitzloop_out.txt] [syllable_joiners]" << endl;
+  if (argc < 3) { 
+    cout << "Wrong number of arguments!\nUsage:\nultraloop ultrastar_in.txt blitzloop_out.txt [syllable_joiners]" << endl;
     return 1; 
   }
   FILE *myfile = fopen(argv[1], "r");
@@ -376,16 +376,15 @@ int main(int argc, char** argv) {
     yyparse();
   } while(!feof(yyin));
 
-  if (argc > 2) {
-    ofstream output(argv[2]);
-    if (!output.good()) {
-      cout << "Can't open output file - will print output to stdio" << endl;
-    } else {
-      output << metaBlock.str() << lyricsBlock.str() << endl;
-      output.close();
-      return 0;
-    }
+  ofstream output(argv[2]);
+  if (!output.good()) {
+    cout << "Can't open output file - will print output to stdio" << endl;
+  } else {
+    output << metaBlock.str() << lyricsBlock.str() << endl;
+    output.close();
+    return 0;
   }
+  
   cout << metaBlock.str() << lyricsBlock.str() << endl;
 }
 
