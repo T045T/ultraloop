@@ -364,6 +364,9 @@ int main(int argc, char** argv) {
   }
   yyin = myfile;
 
+  // Filter out tilde and dash by default
+  metaChars = "~-";
+
   if (argc == 4) {
     metaChars = argv[3];
   }

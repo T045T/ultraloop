@@ -3,7 +3,7 @@ UltraLoop is a converter from [Ultrastar][1]'s song format to [blitzloop][2]'s
 Usage:
 ultraloop infile.txt outfile.txt <syllableJoiners>
 
-Where infile is an Ultrastar song file, outfile is the desired name for the blitzloop song file, and syllablejoiners is an optional string containing characters used to indicate "holding" of the last syllable in the Ultrastar file (usually ~)
+Where infile is an Ultrastar song file, outfile is the desired name for the blitzloop song file, and syllablejoiners is an optional string containing characters used to indicate "holding" of the last syllable in the Ultrastar file - this is set to "~-" (tilde and dash) by default - if you want to disable filtering, use "" as the last argument.
 
 It is built with bison and flex, so make sure you have those ;)
 
