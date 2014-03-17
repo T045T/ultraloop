@@ -7,6 +7,8 @@
   using namespace std;
   int triplet_count = 0;
   int line_num = 0;
+  // used to enable / disable string filtering (for tildes)
+  bool filter = false;
 
   string metaChars = "";
   void debug_output(std::string output) {
@@ -141,6 +143,8 @@ return ARTIST;
 (\ -)?[0-9]+ {
   debug_output("Int");
   if (triplet_count > 0 && --triplet_count == 0) {
+    // enable filtering before parsing the syllable
+    filter = true;
     BEGIN(STRINGPARSE);
   }
   yylval.num  = atoi(yytext);
@@ -157,7 +161,10 @@ FALSE  { yylval.boolean = false; return BOOL; };
 <STRINGPARSE>[^\r\n]+ {
   debug_output("String");
   yylval.text = new std::string(yytext);
-  filter_string(yylval.text, metaChars);
+  if (filter) {
+    filter_string(yylval.text, metaChars);
+    filter = false;
+  }
   BEGIN(INITIAL);
   return STRING;
  };
