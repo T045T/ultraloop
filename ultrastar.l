@@ -125,7 +125,7 @@ return ARTIST;
   return VIDEOGAP;
  };
 
-^#[A-Z]+: {
+^#[A-Za-z]+: {
   debug_output("Unrecognized Tag");
   yylval.text = new std::string(yytext);
   BEGIN(STRINGPARSE);
