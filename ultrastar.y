@@ -29,7 +29,7 @@
   //! the meta data block
   stringstream metaBlock;
   //! the GAP value from the ultrastar file (defaults to 0)
-  int gap = 0;
+  float gap = 0;
   //! bpm value - needs to be saved because we can't use it until we found the line count (mandatory, if -1 by the time we're done parsing, throw a fit)
   float bpm = -1.0;
   //! whether the offsets are relative - this will influence calculations, but only a little (optional tag, defaults to false)
@@ -217,7 +217,12 @@ mp3Tag: MP3 STRING
   songInfo.audio = *$2;
   // cout << "Song file is " << songInfo.audio << endl;
 };
-gapTag: GAP INT 
+gapTag: GAP INT FRACTION
+{
+  gap = ((float) $2) + 3;
+  // cout << "gap is " << gap << endl;
+}
+| GAP INT
 {
   gap = $2;
   // cout << "gap is " << gap << endl;
