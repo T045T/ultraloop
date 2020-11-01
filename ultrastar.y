@@ -297,6 +297,13 @@ data: /* empty */
 
   // If the string is empty or contains just a single space, the lexer has removed one or more Tilde characters, so this line should be merged with the previous syllable
   bool isSpacer = $6->length() < 2;
+  // Special case for lines that are not just Tilde characters, but don't have any letters either:
+  // Treat them as spacers (i.e. add the length to the previous syllable), but also add a plain space to the lyrics line to ensure word separation.
+  if ($6->find_first_not_of(' ', 1) == std::string::npos) {
+    isSpacer = true;
+    currentLyrics << " ";
+  }
+
 
   //since we can only calculate the duration for the previous note, don't append anything to currentTiming on new line
   if (newLine) {
